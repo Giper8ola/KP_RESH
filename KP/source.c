@@ -1,6 +1,3 @@
-
-
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <locale.h>
@@ -8,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <Windows.h>
-
+#include <use_ansi.h>
 
 typedef struct Date
 {
@@ -36,6 +33,7 @@ int updateOne(char* fileName, int number, inventory newParams);
 int compare(const void* x1, const void* x2);
 inventory* fillArrayOfInv(char* filename);
 int countOfInvInFile(char* fileName);
+int validateDate(int*, char);
 
 int main()
 {
@@ -53,7 +51,7 @@ int main()
         {
         case 1: {
             inventory invent[1];
-
+            int saveState;
             invent[0].number = rand() % 100;
 
             printf("¬ведите название оборудовани€: ");
@@ -61,7 +59,7 @@ int main()
             scanf("%[^\n]", &invent[0].name);
 
             printf("¬ведите категорию оборудовани€: ");
-            fgets(invent[0].category, 100, stdin);
+            fgets(invent.category, 100, stdin);
             scanf("%[^\n]", &invent[0].category);
 
             printf("¬ведите описани€ оборудовани€: ");
@@ -69,18 +67,32 @@ int main()
             scanf("%[^\n]", &invent[0].description);
 
             printf("ƒата инвертаризации: \n");
-            printf("¬ведите день: ");
-            scanf("%d", &invent[0].Date.day);
-            printf("¬ведите мес€ц: ");
-            scanf("%d", &invent[0].Date.month);
-            printf("¬ведите год: ");
-            scanf("%d", &invent[0].Date.year);
+            validateDate(&invent->Date.day, 'd');
+            validateDate(&invent->Date.month, 'm');
+            validateDate(&invent->Date.year, 'y');
 
             printf("¬ведите состо€ни€ оборудовани€: ");
             fgets(invent[0].state, 100, stdin);
             scanf("%[^\n]", &invent[0].state);
 
-            save(filename, invent);
+            puts("—охранить в Ѕƒ?\n 1 - да\n 2 - нет");
+            scanf("%d", &saveState);
+            switch (saveState)
+            {
+                case 1:
+                {
+                    save(filename, invent);
+                    break;
+                }
+                case 2:
+                {
+                   
+                    break;
+                }
+            default:
+                free(&invent);
+                break;
+            }
             break;
         }
         case 2: {
@@ -193,7 +205,7 @@ int loadMany(char* filename)
 }
 
 
-int loadOne(char* filename, char category[50])
+int loadOne(char* filename, char category[100])
 {
     inventory Invent;
     FILE* fp = fopen(filename, "r");
@@ -318,4 +330,53 @@ inventory* fillArrayOfInv(char* fileName)
     fclose(fp2);
 
     return Invent;
+}
+
+int validateDate(int* date, char type)
+{
+    int day, month, year;
+    switch (type)
+    {
+        case 'd': 
+        {
+            printf("¬ведите день: ");
+            scanf("%d", &day);
+            while (day <= 1 || day > 31)
+            {
+                printf("\33[2K\r");
+                printf("¬ведите корректный номер дн€(1 - 31): ");
+                scanf("%d", &day);
+            }
+            *date = day;
+            break;
+        }
+        case 'm':
+        {
+            printf("¬ведите мес€ц: ");
+            scanf("%d", &month);
+            while (month <= 1 || month > 12)
+            {
+                printf("\33[2K");
+                printf("¬ведите корректный номер мес€ца(1 - 12): ");
+                scanf("%d", &month);
+            }
+            *date = month;
+            break;
+        }
+        case 'y':
+        {
+            printf("¬ведите год: ");
+            scanf("%d", &year);
+            while (year <= 1600 || year > 2023)
+            {
+                printf("\33[2K");
+                printf("¬ведите корректный номер года(1600 - 2023): ");
+                scanf("%d", &year);
+            }
+            *date = year;
+            break;
+        }
+    default:
+        break;
+    }
 }
