@@ -26,12 +26,12 @@ typedef struct Inventory
 
 int save(char* filename, inventory Invent[1]);
 int loadMany(char* filename);
-int loadOne(char* filename, char category[50]);
+int loadOne(char* filename, char category[100]);
 int sort(char* fileName);
 int updateOne(char* fileName, int number, inventory newParams);
 
 int compare(const void* x1, const void* x2);
-inventory* fillArrayOfInv(char* filename);
+void fillArrayOfInv(char* filename, inventory* Invent);
 int countOfInvInFile(char* fileName);
 int validateDate(int*, char);
 
@@ -59,7 +59,7 @@ int main()
             scanf("%[^\n]", &invent[0].name);
 
             printf("Введите категорию оборудования: ");
-            fgets(invent.category, 100, stdin);
+            fgets(invent[0].category, 100, stdin);
             scanf("%[^\n]", &invent[0].category);
 
             printf("Введите описания оборудования: ");
@@ -86,11 +86,9 @@ int main()
                 }
                 case 2:
                 {
-                   
                     break;
                 }
             default:
-                free(&invent);
                 break;
             }
             break;
@@ -221,7 +219,7 @@ int loadOne(char* filename, char category[100])
 int sort(char* fileName)
 {
     inventory* Invent;
-    Invent = fillArrayOfInv(fileName);
+    fillArrayOfInv(fileName, &Invent);
 
     int j2 = countOfInvInFile(fileName);
 
@@ -231,20 +229,20 @@ int sort(char* fileName)
         printf("\n\tНазвание оборудования: %s\n\tКатегория оборудования: %s\n\tНомер оборудования: %d\n\tОписание оборудования: %s\n\tДата инвертаризации: %d.%d.%d\n\tСостояние оборудования: %s\n", Invent[i].name, Invent[i].category, Invent[i].number, Invent[i].description, Invent[i].Date.day, Invent[i].Date.month, Invent[i].Date.year, Invent[i].state);
 
     printf("\n");
+    free(Invent);
 }
 
 int updateOne(char* fileName, int number, inventory newParams)
 {
-    int pos;
+    int pos, j2;
     inventory* Invent;
-    inventory inv;
     inventory* newInvent;
+    inventory inv;
+  
+    fillArrayOfInv(fileName, &Invent);
 
-    Invent = fillArrayOfInv(fileName);
-
-    int j2 = countOfInvInFile(fileName);
-
-    newInvent = (inventory*)malloc(j2 * sizeof(inventory));
+    newInvent = (inventory*)malloc(sizeof(Invent));
+    j2 = countOfInvInFile(fileName);
 
     for (int i = 0; i < j2; i++)
     {
@@ -283,6 +281,8 @@ int updateOne(char* fileName, int number, inventory newParams)
     fwrite(newInvent, size, j2, fp2);
     printf("Файл успешно обновлен");
     fclose(fp2);
+    free(Invent);
+    free(newInvent);
 }
 
 int compare(const void* x1, const void* x2)
@@ -312,11 +312,11 @@ int countOfInvInFile(char* fileName)
     return count;
 }
 
-inventory* fillArrayOfInv(char* fileName)
+void fillArrayOfInv(char* fileName, inventory* Invent)
 {
     int j, j2 = 0;
     inventory inv;
-    inventory* Invent;
+    
     j = countOfInvInFile(fileName);
 
     FILE* fp2 = fopen(fileName, "r");
@@ -328,8 +328,6 @@ inventory* fillArrayOfInv(char* fileName)
         j2++;
     }
     fclose(fp2);
-
-    return Invent;
 }
 
 int validateDate(int* date, char type)
@@ -341,7 +339,7 @@ int validateDate(int* date, char type)
         {
             printf("Введите день: ");
             scanf("%d", &day);
-            while (day <= 1 || day > 31)
+            while (day < 1 || day > 31)
             {
                 printf("\33[2K\r");
                 printf("Введите корректный номер дня(1 - 31): ");
@@ -354,7 +352,7 @@ int validateDate(int* date, char type)
         {
             printf("Введите месяц: ");
             scanf("%d", &month);
-            while (month <= 1 || month > 12)
+            while (month < 1 || month > 12)
             {
                 printf("\33[2K");
                 printf("Введите корректный номер месяца(1 - 12): ");
